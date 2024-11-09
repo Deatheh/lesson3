@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -13,28 +14,36 @@ var ans int
 func chet(str string) string {
 	var new_arr = []string{}
 	arr := strings.Fields(str)
-	fmt.Println(arr[1])
+	new_arr = append(new_arr, arr[0])
 	for i := 1; i < len(arr)-1; i++ {
 		if arr[i] == "*" {
 			tmp_1, err := strconv.ParseFloat(new_arr[len(new_arr)-1], 64)
+			tmp_2, err := strconv.ParseFloat(arr[i+1], 64)
 			if 1 == 0 {
 				print(err)
 			}
-			tmp_2, err := strconv.ParseFloat(arr[i+1], 64)
+			new_arr = new_arr[:len(new_arr)-1]
 			new_arr = append(new_arr, fmt.Sprint(tmp_1*tmp_2))
+			i++
 		} else if arr[i] == "/" {
 			tmp_1, err := strconv.ParseFloat(new_arr[len(new_arr)-1], 64)
 			tmp_2, err := strconv.ParseFloat(arr[i+1], 64)
 			if 1 == 0 {
 				print(err)
 			}
+			new_arr = new_arr[:len(new_arr)-1]
 			new_arr = append(new_arr, fmt.Sprint(tmp_1/tmp_2))
+			i++
 		} else {
 			new_arr = append(new_arr, arr[i])
 		}
 	}
-	/*arr = new_arr
+	if arr[len(arr)-2] == "+" || arr[len(arr)-2] == "-" {
+		new_arr = append(new_arr, arr[len(arr)-1])
+	}
+	arr = new_arr
 	new_arr = []string{}
+	new_arr = append(new_arr, arr[0])
 	for i := 1; i < len(arr)-1; i++ {
 		if arr[i] == "+" {
 			tmp_1, err := strconv.ParseFloat(new_arr[len(new_arr)-1], 64)
@@ -42,19 +51,21 @@ func chet(str string) string {
 			if 1 == 0 {
 				print(err)
 			}
+			new_arr = new_arr[:len(new_arr)-1]
 			new_arr = append(new_arr, fmt.Sprint(tmp_1+tmp_2))
+			i++
 		} else if arr[i] == "-" {
 			tmp_1, err := strconv.ParseFloat(new_arr[len(new_arr)-1], 64)
 			tmp_2, err := strconv.ParseFloat(arr[i+1], 64)
 			if 1 == 0 {
 				print(err)
 			}
+			new_arr = new_arr[:len(new_arr)-1]
 			new_arr = append(new_arr, fmt.Sprint(tmp_1-tmp_2))
+			i++
+		} else {
+			new_arr = append(new_arr, arr[i])
 		}
-	}*/
-
-	for i := 0; i < len(new_arr); i++ {
-		fmt.Println(new_arr[i])
 	}
 	return new_arr[0]
 }
@@ -66,17 +77,17 @@ func findScope(str string) string {
 		key = false
 		for i := 0; i < len(str); i++ {
 			if new_str_tmp == "" {
-				if str[i] != '(' {
+				if string(str[i]) != "(" {
 					new_str += string(str[i])
 				} else {
 					key = true
 					new_str_tmp = "("
 				}
 			} else {
-				if str[i] == ')' {
+				if string(str[i]) == ")" {
 					new_str += chet(new_str_tmp[1:])
 					new_str_tmp = ""
-				} else if str[i] == '(' {
+				} else if string(str[i]) == "(" {
 					new_str += new_str_tmp
 					new_str_tmp = "("
 				} else {
@@ -84,20 +95,28 @@ func findScope(str string) string {
 				}
 			}
 		}
+
 		str = new_str
 		new_str = ""
 		new_str_tmp = ""
 	}
-	return chet(new_str)
+	return chet(str)
 }
 
 func main() {
-	file, err := os.ReadFile("file.txt")
+	file, err := os.OpenFile("2/file.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		fmt.Println("Unable to create file:", err)
 		os.Exit(1)
 	}
-	str = string(file)
-	fmt.Println(str)
-	//fmt.Println(chet(str))
+	defer file.Close()
+	data := make([]byte, 64)
+	for {
+		n, err := file.Read(data)
+		if err == io.EOF {
+			break
+		}
+		str = string(data[:n])
+	}
+	fmt.Println(findScope(str))
 }
