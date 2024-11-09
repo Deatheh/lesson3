@@ -2,9 +2,13 @@ package main
 
 import "fmt"
 
-var name = "Sergei"
-var name2 = "Danial"
+var year int
 
 func main() {
-	fmt.Println(name, " and ", name2)
+	fmt.Scan(&year)
+	if year%400 == 0 || (year%4 == 0 && year%100 != 0) {
+		fmt.Println("Високосный")
+	} else {
+		fmt.Println("Не высокосный")
+	}
 }
